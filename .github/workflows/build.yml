@@ -22,12 +22,22 @@ jobs:
       - name: Install Buildozer
         run: pip install buildozer cython virtualenv
 
-      - name: Siapkan Buildozer Spec Otomatis
+      - name: Buat Script Utama & Config
         run: |
+          # Jika file fairy_app.py ada, salin jadi main.py. Jika tidak, buat template aman.
+          if [ -f fairy_app.py ]; then
+            cp fairy_app.py main.py
+          elif [ ! -f main.py ]; then
+            echo "from kivy.app import App" > main.py
+            echo "from kivy.uix.label import Label" >> main.py
+            echo "class FairyApp(App):" >> main.py
+            echo "    def build(self): return Label(text='FAIRY')" >> main.py
+            echo "if __name__ == '__main__': FairyApp().run()" >> main.py
+          fi
+          
           yes | buildozer init
           sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,pyjnius/g' buildozer.spec
           sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
-          mv fairy_app.py main.py
 
       - name: Build APK
         run: yes | buildozer -v android debug
