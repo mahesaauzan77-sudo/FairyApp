@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -27,12 +27,13 @@ jobs:
           yes | buildozer init
           sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,pyjnius/g' buildozer.spec
           sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
+          mv fairy_app.py main.py
 
       - name: Build APK
         run: yes | buildozer -v android debug
 
       - name: Upload APK ke HP Master
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Aplikasi-FAIRY
           path: bin/*.apk
