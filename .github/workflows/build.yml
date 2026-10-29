@@ -1,0 +1,38 @@
+name: FAIRY Android Build
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y openjdk-17-jdk autoconf automake libtool pkg-config zlib1g-dev libssl-dev libffi-dev
+
+      - name: Install Buildozer
+        run: pip install buildozer cython virtualenv
+
+      - name: Siapkan Buildozer Spec Otomatis
+        run: |
+          yes | buildozer init
+          sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,pyjnius/g' buildozer.spec
+          sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
+
+      - name: Build APK
+        run: yes | buildozer -v android debug
+
+      - name: Upload APK ke HP Master
+        uses: actions/upload-artifact@v3
+        with:
+          name: Aplikasi-FAIRY
+          path: bin/*.apk
